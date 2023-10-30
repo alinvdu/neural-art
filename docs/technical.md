@@ -39,6 +39,28 @@
     # Time Frequency:
         * Specify time frequency decomposition method (eg. wavelet convolution).
         * Consider ranges of interest in terms of frequencies.
+    # Feedback Loops:
+        * After the art is shown to participants collect data about the association with the image.
 
-## Feedback Loops:
-    * After the art is shown to participants collect data about the association with the image.
+## EEG Data
+    * Calibration phase:
+        - 10000ms look at cursor.
+        - 10000ms keep eyes closed.
+    * Stimuli Phase:
+        - 8000ms preparation -> get accustomed with the image.
+        - 5000ms preparation -> letting user know that recording is starting.
+        - 8000ms recording - eyes open.
+        - 3000ms preparation -> letting user know that recording ended.
+        - 4000ms preparation -> letting user know to imagine with eyes closed.
+        - 8000ms recording - eyes closed - imagination.
+    * First experiment with the first 10 images can be found here: https://player.emotivpro.com/remote/MzgjXc2NjA=Yqb
+    * Emotiv will output 2 kinds of files to be used:
+        1. intervalMarker.
+            Structure: latency, duration, type, marker_value, key, timestamp, marker_id, timestamp.
+            Columns we are interested in: duration, type and marker_value.
+            Values we are interested in for marker: recording, recording_eyes_closed.
+            Values we are interested in for type: phase_Meditating_cube, phase_Image_Cube, phase_Sitting_on_the_chair_in_nature, phase_The_valley_of_white, phase_The_cute_rat, phase_Abstract_forms_of_beauty, phase_The_Japanese_creature, phase_The_babel_fish, phase_Simulated_garden, phase_Parallel_Universes_Road.
+        2. md.csv document with the containing neural serial data.
+## Processing the EEG data
+    # Stage 1: Processing the invervalMarker andd md.csv data in Python.
+        Process these 2 csv files and output 1 csv files / each recording with the appropriate fields.
