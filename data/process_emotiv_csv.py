@@ -1,6 +1,7 @@
 import pandas as pd
 import argparse
 import os
+import numpy as np
 
 def process_data(experiment_name, trial):
     # Load the intervalMarker data
@@ -15,20 +16,13 @@ def process_data(experiment_name, trial):
 
     # Filter the interval_data for records of interest
     relevant_markers = ['recording', 'recording_eyes_closed']
-    relevant_types = [
-        'phase_Meditating_cube', 'phase_Image_Cube', 'phase_Sitting_on_the_chair_in_nature', 
-        'phase_The_valley_of_white', 'phase_The_cute_rat', 'phase_Abstract_forms_of_beauty', 
-        'phase_The_Japanese_creature', 'phase_The_babel_fish', 'phase_Simulated_garden', 
-        'phase_Parallel_Universes_Road'
-    ]
-
     filtered_data = interval_data[(interval_data['marker_value'].isin(relevant_markers))]
 
     for index, row in filtered_data.iterrows():
         # Find the parent type for the current record
         parent_type_index = interval_data[
             (interval_data['timestamp'] < row['timestamp']) & 
-            (interval_data['type'].isin(relevant_types))
+            (interval_data['type'].str.startswith('phase_Stimuli'))
         ].iloc[-1]
         parent_type = parent_type_index['type']
 
@@ -53,12 +47,16 @@ def process_data(experiment_name, trial):
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
-        filename = f"{output_dir}{parent_type}_{row['marker_value']}.csv"
-        with open(filename, 'w') as f:
+        filenameCsv = f"{output_dir}{parent_type}_{row['marker_value']}.csv"
+        filenameNpy = f"{output_dir}{parent_type}_{row['marker_value']}.npy"
+        with open(filenameCsv, 'w') as f:
             f.write(','.join(header.keys()) + '\n')
             f.write(','.join(map(str, header.values())) + '\n')
             f.write(','.join(header_df) + '\n')
             relevant_neural_data.to_csv(f, index=False, header=False)
+
+
+        np.save(filenameNpy, relevant_neural_data.values.T)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Process EEG data based on experiment name and trial.')
