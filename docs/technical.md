@@ -10,11 +10,10 @@
 2. All the above labels are kept together with the data for reference processes but the actual data used is the EEG data that's elicited based on this stimuli.
 3. The data is pre-processed using Neural Signal Processing algorithms and then outputed in table format that the model can read, together with the ground truth.
     x. Cleaning the data:
-        x.0. High pass filter.
-        x.1. ICA for cleaning data.
-        x.2. Band-Pass Filtering (anything outside of 100 hz).
-        x.3. Notch Filtering (eliminate power line interference 50hz to 60hz).
-        x.4. Laplacian Space Filtering.
+        x.1. High pass filter.
+        x.2. Baseline normalization (with or without eyes open).
+        x.3. ICA for cleaning data.
+        x.4. Manual Inspect of Time-Frequency plot for all channels for individual removal of ICA components.
     a. ERPs.
     b. Time-Frequency.
         b.1. Baseline normalization.

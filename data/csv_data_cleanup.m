@@ -12,10 +12,9 @@
 
 % Define the file path (you should replace this with your actual file path)
 
-phase = 'phase_Stimuli_Fantastic_Planet_recording';
+phase = 'phase_Stimuli_Abstract_Flower_recording_eyes_closed';
 trial = 'trial1/';
 filename = [trial phase '.csv'];
-chan2use = 2;
 
 % Set import options for metadata
 opts_meta = delimitedTextImportOptions('NumVariables', 4);
@@ -55,7 +54,7 @@ eegData = eegData(:, 2:end);
 eegData = cellfun(@str2double, eegData);
 
 %% Load cleaned EEG Data - run this only if you want to adjust the clean data with ICA
-cleanedFilename = [trial phase '/cleaned/_cleaned.csv'];
+cleanedFilename = [trial '/cleaned/' phase '_cleaned.csv'];
 eegData = readmatrix(cleanedFilename);
 
 %% Finish EEG Data
@@ -68,7 +67,7 @@ b = 8; % desired maximum value
 t_normalized = (a + (time - t_min) * (b - a) / (t_max - t_min))';
 
 %import baseline
-baseline = 'trial1/baseline_eyesopen.csv';
+baseline = 'trial1/baseline_eyesclosed.csv';
 
 % Set import options for EEG data
 opts_baseline = delimitedTextImportOptions('NumVariables', 15);
@@ -83,6 +82,9 @@ baselineData = cellfun(@str2double, baselineDataTable(:, 2:end));
 
 srate = 128;
 npnts = length(time);
+
+numChan = size(eegChannels);
+numChan = numChan(2);
 
 % create a time frequency map for visualization
 min_freq = 0;
@@ -108,77 +110,78 @@ n = 4;
 [b, a] = butter(n, fc/(srate/2), 'high');
 
 % Apply the filter - and normalization - not needed for clean data.
-% c = filtfilt(b, a, eegData);
-filteredBaselineData = filtfilt(b, a, baselineData);
+% filteredData = filtfilt(b, a, eegData);
+% filteredBaselineData = filtfilt(b, a, baselineData);
 % 
 % baselinedData = bsxfun(@minus, filteredData, filteredBaselineData);
 
-% FFT
-dataX = fft(filteredData(:, chan2use)', nConv);
-dataX = fft(eegData(:, chan2use)', nConv); % use this for cleaned data
-dataXBaselined = fft(baselinedData(:, chan2use)', nConv);
-
-tf = zeros(num_freq, npnts);
-tf_baselined = zeros(num_freq, npnts);
+tf = zeros(numChan, num_freq, npnts);
+tf_baselined = zeros(numChan, num_freq, npnts);
 range_cycles = [ 4 10 ];
 s = logspace(log10(range_cycles(1)), log10(range_cycles(end)), num_freq) ./ (2*pi*frex);
 
-% convolution over frequencies
-for fi=1:length(frex)
-    % create a wavelet and get its FFT
-    %wavelet = exp(2*1i*pi*frex(fi).*wave_time) .* exp(-4*log(2)*wave_time.^2 / fwhm(fi).^2);
-    wavelet = exp(2*1i*pi*frex(fi).*wave_time) .* exp(-wave_time.^2./(2*s(fi)^2));
-    waveletX = fft(wavelet, nConv);
-
-    % scale
-    waveletX = waveletX ./ max(waveletX);
-
-    % convolution
-    as = ifft(waveletX .* dataX);
-
-    % cut wings
-    as = as(half_wave+1:end-half_wave);
-
-    % compute power and average over trials
-    tf(fi, :) = 2 * abs(as).^2;
-
-    % repeat everything for baseline
-    as_baseline = ifft(waveletX .* dataXBaselined);
-
-    % cut wings
-    as_baseline = as_baseline(half_wave+1:end-half_wave);
-
-    % compute power and average over trials
-    tf_baselined(fi, :) = 2 * abs(as_baseline).^2;
+for fig = 1:ceil(numChan/4)
+    figure(fig), clf; % Clear the figure once before creating subplots
 end
 
-% plot
-figure(1), clf;
-%offset = 1e-15;  % This is a small offset value
-contourf(t_normalized, frex, tf, 40, "linecolor", "none");
-colormap jet
+% convolution over frequencies for each channel
+for ch=1:numChan
+    % FFT
+    %dataX = fft(filteredData(:, ch)', nConv);
+    dataX = fft(eegData(:, ch)', nConv); % use this for cleaned data
+    %dataXBaselined = fft(baselinedData(:, ch)', nConv);
+    for fi=1:length(frex)
+        % create a wavelet and get its FFT
+        %wavelet = exp(2*1i*pi*frex(fi).*wave_time) .* exp(-4*log(2)*wave_time.^2 / fwhm(fi).^2);
+        wavelet = exp(2*1i*pi*frex(fi).*wave_time) .* exp(-wave_time.^2./(2*s(fi)^2));
+        waveletX = fft(wavelet, nConv);
+    
+        % scale
+        waveletX = waveletX ./ max(waveletX);
+    
+%         % convolution
+%         as = ifft(waveletX .* dataX);
+%     
+%         % cut wings
+%         as = as(half_wave+1:end-half_wave);
+%     
+%         % compute power and average over trials
+%         tf(ch, fi, :) = 2 * abs(as).^2;
+    
+        % repeat everything for baseline
+        %as_baseline = ifft(waveletX .* dataXBaselined);
+        as_baseline = ifft(waveletX .* dataX);
+    
+        % cut wings
+        as_baseline = as_baseline(half_wave+1:end-half_wave);
+    
+        % compute power and average over trials
+        tf_baselined(ch, fi, :) = 2 * abs(as_baseline).^2;
+    end
 
-% figure meta data
-title("Time & frequency plot of data without baseline norm " + eegChannels{chan2use});
-xlabel("Time (ms)");
-ylabel("Frequency (Hz)");
+    % Determine which figure to plot on
+    figNum = ceil(ch / 4);
+    figure(figNum);
 
-figure(2), clf;
-%offset = 1e-15;  % This is a small offset value
-contourf(t_normalized, frex, tf_baselined, 40, "linecolor", "none");
-colormap jet
+    % Determine the position of the subplot
+    subPlotNum = mod(ch-1, 4) + 1;
+    subplot(2, 2, subPlotNum);
 
-% figure meta data
-title("Time & frequency plot of data without baseline norm " + eegChannels{chan2use});
-xlabel("Time (ms)");
-ylabel("Frequency (Hz)");
+    contourf(t_normalized, frex, squeeze(tf_baselined(ch, :, :)), 40, "linecolor", "none");
+    colormap jet
+    
+    % figure meta data
+    title("Time & frequency plot baseline norm " + eegChannels{ch});
+    xlabel("Time (ms)");
+    ylabel("Frequency (Hz)");
+end
 
 number_of_components = 14;
 
 % ICA
 [icasig, mixingMatrix, separatingMatrix] = fastica(baselinedData', 'numOfIC', number_of_components);
 
-figure(3), clf;
+figure(5), clf;
 % Plot time courses
 
 foundComp = size(icasig);
@@ -198,7 +201,7 @@ nRows = ceil(sqrt(nComponents));
 nCols = ceil(nComponents / nRows);
 
 % Create a figure
-figure(4), clf;
+figure(6), clf;
 
 chanlocsX = [-0.3, -0.6, -0.5, -0.5, -0.9, -0.8, -0.6, 0.6, 0.8, 0.9, 0.5, 0.5, 0.6, 0.3];
 chanlocsY = [0.6, 0.5, 0.8, 0.3, 0, -0.3, -0.6, -0.6, -0.3, 0, 0.3, 0.8, 0.5, 0.6];
@@ -260,40 +263,7 @@ componentToRemove = 3;
 artifactSignal = mixingMatrix(:, componentToRemove) * icasig(componentToRemove, :);
 baselinedData = baselinedData - artifactSignal';
 
-dataXBaselined = fft(baselinedData(:, chan2use)', nConv);
-tf_baselined = zeros(num_freq, npnts);
-
-% convolution over frequencies
-for fi=1:length(frex)
-    % create a wavelet and get its FFT
-    %wavelet = exp(2*1i*pi*frex(fi).*wave_time) .* exp(-4*log(2)*wave_time.^2 / fwhm(fi).^2);
-    wavelet = exp(2*1i*pi*frex(fi).*wave_time) .* exp(-wave_time.^2./(2*s(fi)^2));
-    waveletX = fft(wavelet, nConv);
-
-    % scale
-    waveletX = waveletX ./ max(waveletX);
-
-    % repeat everything for baseline
-    as_baseline = ifft(waveletX .* dataXBaselined);
-
-    % cut wings
-    as_baseline = as_baseline(half_wave+1:end-half_wave);
-
-    % compute power and average over trials
-    tf_baselined(fi, :) = 2 * abs(as_baseline).^2;
-end
-
-figure(5), clf;
-%offset = 1e-15;  % This is a small offset value
-contourf(t_normalized, frex, tf_baselined, 40, "linecolor", "none");
-colormap jet
-
-% figure meta data
-title("Time & frequency plot of data with removed ICA " + eegChannels{chan2use});
-xlabel("Time (ms)");
-ylabel("Frequency (Hz)");
-
-exportfilename = [trial phase '/cleaned/_cleaned.csv'];
+exportfilename = [trial '/cleaned/' phase '_cleaned.csv'];
 
 % Export the data to a CSV file
 writematrix(baselinedData, exportfilename);
