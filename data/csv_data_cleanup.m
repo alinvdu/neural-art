@@ -11,8 +11,11 @@
 % The output will be a cleaned eeg file with .csv format.
 
 % Define the file path (you should replace this with your actual file path)
-filename = 'trial1/phase_Stimuli_Fantastic_Planet_recording.csv';
-chan2use = 6;
+
+phase = 'phase_Stimuli_Fantastic_Planet_recording';
+trial = 'trial1/';
+filename = [trial phase '.csv'];
+chan2use = 2;
 
 % Set import options for metadata
 opts_meta = delimitedTextImportOptions('NumVariables', 4);
@@ -28,6 +31,7 @@ metadata = readtable(filename, opts_meta);
 % Convert the metadata table to a cell array if needed
 metadata = table2cell(metadata);
 
+%% This part is for Emotiv EEG files if ou want to refine your data please load the cleaned state.
 % Set import options for EEG data
 opts_eeg = delimitedTextImportOptions('NumVariables', 15);
 opts_eeg.VariableNamesLine = 3;  % Line where variable names are defined
@@ -38,26 +42,30 @@ opts_eeg = setvaropts(opts_eeg, 1:15, 'EmptyFieldRule', 'auto');
 
 % Read the EEG data
 eegData = readtable(filename, opts_eeg);
-
 eegChannels = eegData.Properties.VariableNames(2:end);
 
 % Convert the EEG data table to an array
 eegData = table2array(eegData);
 
-% Optionally, separate timestamps and EEG channels
 time = cellfun(@str2double, eegData(:, 1));
+
+eegData = eegData(:, 2:end);
+
+% Ensure eegData is a numeric array before performing fft
+eegData = cellfun(@str2double, eegData);
+
+%% Load cleaned EEG Data - run this only if you want to adjust the clean data with ICA
+cleanedFilename = [trial phase '/cleaned/_cleaned.csv'];
+eegData = readmatrix(cleanedFilename);
+
+%% Finish EEG Data
+% Optionally, separate timestamps and EEG channels
 t_min = min(time);
 t_max = max(time);
 a = 0; % desired minimum value
 b = 8; % desired maximum value
 
 t_normalized = (a + (time - t_min) * (b - a) / (t_max - t_min))';
-
-
-eegData = eegData(:, 2:end);
-
-% Ensure eegData is a numeric array before performing fft
-eegData = cellfun(@str2double, eegData);
 
 %import baseline
 baseline = 'trial1/baseline_eyesopen.csv';
@@ -99,13 +107,15 @@ n = 4;
 % Design the high-pass filter
 [b, a] = butter(n, fc/(srate/2), 'high');
 
-% Apply the filter
-filteredData = filtfilt(b, a, eegData);
+% Apply the filter - and normalization - not needed for clean data.
+% c = filtfilt(b, a, eegData);
 filteredBaselineData = filtfilt(b, a, baselineData);
+% 
+% baselinedData = bsxfun(@minus, filteredData, filteredBaselineData);
 
-baselinedData = bsxfun(@minus, filteredData, filteredBaselineData);
-
+% FFT
 dataX = fft(filteredData(:, chan2use)', nConv);
+dataX = fft(eegData(:, chan2use)', nConv); % use this for cleaned data
 dataXBaselined = fft(baselinedData(:, chan2use)', nConv);
 
 tf = zeros(num_freq, npnts);
@@ -235,7 +245,7 @@ for i = 1:nComponents
     plot(rightEarX, rightEarY, 'k', 'LineWidth', 2);
     
     % Plot the channel locations
-    plot([chanlocs.X], [chanlocs.Y], 'k.', 'MarkerSize', 8);
+    plot(chanlocsX, chanlocsY, 'k.', 'MarkerSize', 8);
     
     % Add title and remove axes for clarity
     title(['Component ' num2str(i)]);
@@ -246,11 +256,44 @@ end
 colormap(jet);
 
 % remove component
-componentToRemove = ?
+componentToRemove = 3;
 artifactSignal = mixingMatrix(:, componentToRemove) * icasig(componentToRemove, :);
-baselinedData = baselinedData - artifactSignal;
+baselinedData = baselinedData - artifactSignal';
 
-exportfilename = 'trial1/clean_EEGData.csv';
+dataXBaselined = fft(baselinedData(:, chan2use)', nConv);
+tf_baselined = zeros(num_freq, npnts);
+
+% convolution over frequencies
+for fi=1:length(frex)
+    % create a wavelet and get its FFT
+    %wavelet = exp(2*1i*pi*frex(fi).*wave_time) .* exp(-4*log(2)*wave_time.^2 / fwhm(fi).^2);
+    wavelet = exp(2*1i*pi*frex(fi).*wave_time) .* exp(-wave_time.^2./(2*s(fi)^2));
+    waveletX = fft(wavelet, nConv);
+
+    % scale
+    waveletX = waveletX ./ max(waveletX);
+
+    % repeat everything for baseline
+    as_baseline = ifft(waveletX .* dataXBaselined);
+
+    % cut wings
+    as_baseline = as_baseline(half_wave+1:end-half_wave);
+
+    % compute power and average over trials
+    tf_baselined(fi, :) = 2 * abs(as_baseline).^2;
+end
+
+figure(5), clf;
+%offset = 1e-15;  % This is a small offset value
+contourf(t_normalized, frex, tf_baselined, 40, "linecolor", "none");
+colormap jet
+
+% figure meta data
+title("Time & frequency plot of data with removed ICA " + eegChannels{chan2use});
+xlabel("Time (ms)");
+ylabel("Frequency (Hz)");
+
+exportfilename = [trial phase '/cleaned/_cleaned.csv'];
 
 % Export the data to a CSV file
-writematrix(filename, cleanedEEGData);
+writematrix(baselinedData, exportfilename);
