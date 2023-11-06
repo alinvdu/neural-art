@@ -12,12 +12,12 @@
 
 % Define the file path (you should replace this with your actual file path)
 
-phase = 'phase_Stimuli_Abstract_Flower_recording_eyes_closed';
-trial = 'trial1/';
+phase = 'phase_Stimuli_Structural_DNA_recording';
+trial = 'trial4/';
 filename = [trial phase '.csv'];
 
 % Set import options for metadata
-opts_meta = delimitedTextImportOptions('NumVariables', 4);
+opts_meta = delimitedTextImportOptions('NumVariables', 4);  
 opts_meta.VariableNamesLine = 1;  % Line where variable names are defined
 opts_meta.DataLines = [2 2];  % Line range of the actual metadata values
 opts_meta.VariableNamingRule = 'preserve';  % Preserve original headers
@@ -54,8 +54,8 @@ eegData = eegData(:, 2:end);
 eegData = cellfun(@str2double, eegData);
 
 %% Load cleaned EEG Data - run this only if you want to adjust the clean data with ICA
-cleanedFilename = [trial '/cleaned/' phase '_cleaned.csv'];
-eegData = readmatrix(cleanedFilename);
+% cleanedFilename = [trial '/cleaned/' phase '_cleaned.csv'];
+% eegData = readmatrix(cleanedFilename);
 
 %% Finish EEG Data
 % Optionally, separate timestamps and EEG channels
@@ -67,7 +67,8 @@ b = 8; % desired maximum value
 t_normalized = (a + (time - t_min) * (b - a) / (t_max - t_min))';
 
 %import baseline
-baseline = 'trial1/baseline_eyesclosed.csv';
+baseline = 'trial1/baseline_eyesopen.csv';
+%baseline = 'trial1/baseline_eyesclosed.csv';
 
 % Set import options for EEG data
 opts_baseline = delimitedTextImportOptions('NumVariables', 15);
@@ -110,11 +111,12 @@ n = 4;
 [b, a] = butter(n, fc/(srate/2), 'high');
 
 % Apply the filter - and normalization - not needed for clean data.
-% filteredData = filtfilt(b, a, eegData);
-% filteredBaselineData = filtfilt(b, a, baselineData);
-% 
-% baselinedData = bsxfun(@minus, filteredData, filteredBaselineData);
+filteredData = filtfilt(b, a, eegData);
+filteredBaselineData = filtfilt(b, a, baselineData);
+baselinedData = bsxfun(@minus, filteredData, filteredBaselineData);
+%baselinedData = eegData;
 
+%% You can re-run this part after removing component
 tf = zeros(numChan, num_freq, npnts);
 tf_baselined = zeros(numChan, num_freq, npnts);
 range_cycles = [ 4 10 ];
@@ -127,9 +129,8 @@ end
 % convolution over frequencies for each channel
 for ch=1:numChan
     % FFT
-    %dataX = fft(filteredData(:, ch)', nConv);
-    dataX = fft(eegData(:, ch)', nConv); % use this for cleaned data
-    %dataXBaselined = fft(baselinedData(:, ch)', nConv);
+    %dataX = fft(eegData(:, ch)', nConv); % use this for cleaned data
+    dataXBaselined = fft(baselinedData(:, ch)', nConv);
     for fi=1:length(frex)
         % create a wavelet and get its FFT
         %wavelet = exp(2*1i*pi*frex(fi).*wave_time) .* exp(-4*log(2)*wave_time.^2 / fwhm(fi).^2);
@@ -149,8 +150,7 @@ for ch=1:numChan
 %         tf(ch, fi, :) = 2 * abs(as).^2;
     
         % repeat everything for baseline
-        %as_baseline = ifft(waveletX .* dataXBaselined);
-        as_baseline = ifft(waveletX .* dataX);
+        as_baseline = ifft(waveletX .* dataXBaselined);
     
         % cut wings
         as_baseline = as_baseline(half_wave+1:end-half_wave);
@@ -259,7 +259,7 @@ end
 colormap(jet);
 
 % remove component
-componentToRemove = 3;
+componentToRemove = 4;
 artifactSignal = mixingMatrix(:, componentToRemove) * icasig(componentToRemove, :);
 baselinedData = baselinedData - artifactSignal';
 
