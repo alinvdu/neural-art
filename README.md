@@ -10,3 +10,9 @@ An interface for visualizing and interacting with neural data, coupled with AI-d
 ## AI Model Architecture
 ### Training EEG representation
 ### Fine-Tunning Stable Diffusion with CLIP
+
+## Credits
+### Art
+Credits for art pictures go to: https://github.com/sai-42
+### AI Architecture
+Credits for AI architecture go to: https://github.com/bbaaii/DreamDiffusion/tree/main
