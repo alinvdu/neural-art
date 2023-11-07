@@ -6,3 +6,7 @@ An interface for visualizing and interacting with neural data, coupled with AI-d
 ## Brain on Art
 
 <img src="https://github.com/bobergsatoko/neural-art/assets/16021447/4b72c8c6-db18-4ba0-8a94-9c5585f7db30" width="968">
+
+## AI Model Architecture
+### Training EEG representation
+### Fine-Tunning Stable Diffusion with CLIP
