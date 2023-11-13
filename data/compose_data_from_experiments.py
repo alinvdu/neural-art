@@ -20,9 +20,12 @@ def copy_and_rename_image(csv_path, img_dir, index):
     parts = csv_path.split(os.sep)
     # Remove the '_cleaned.csv' and the suffix '_eyes_closed' from the CSV filename
     csv_base_name = parts[-1].replace('_cleaned.csv', '').replace('_eyes_closed', '')
-    
+
     # Construct the base path for the image
     base_path = os.path.join('raw', parts[2], 'images', csv_base_name + '.png')
+
+    if (parts[2] != 'experiment1'):
+        base_path = base_path.replace('_recording', '')
     
     if os.path.exists(base_path):
         # Open and resize the image

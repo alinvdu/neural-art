@@ -12,8 +12,8 @@
 
 % Define the file path (you should replace this with your actual file path)
 
-phase = 'phase_Stimuli_Structural_DNA_recording';
-trial = 'trial4/';
+phase = 'phase_Stimuli_Swirly_Paintings_recording';
+trial = 'trial3/';
 filename = [trial phase '.csv'];
 
 % Set import options for metadata
@@ -67,8 +67,12 @@ b = 8; % desired maximum value
 t_normalized = (a + (time - t_min) * (b - a) / (t_max - t_min))';
 
 %import baseline
-baseline = 'trial1/baseline_eyesopen.csv';
-%baseline = 'trial1/baseline_eyesclosed.csv';
+if endsWith(phase, 'eyes_closed')
+    baseline = [trial 'baseline_eyesclosed.csv'];
+else
+    baseline = [trial 'baseline_eyesopen.csv'];
+end
+disp(baseline)
 
 % Set import options for EEG data
 opts_baseline = delimitedTextImportOptions('NumVariables', 15);
@@ -189,7 +193,7 @@ foundComp = foundComp(1);
 
 for i = 1:foundComp
     subplot(foundComp, 1, i);
-    plot(icasig(i, :));
+    plot(t_normalized, icasig(i, :));
     title(['Component ' num2str(i)]);
 end
 
@@ -259,10 +263,63 @@ end
 colormap(jet);
 
 % remove component
-componentToRemove = 4;
+componentToRemove = 1;
+
+% plot component to remove for inspection not normalized
+figure(7), clf;
+plot(t_normalized, icasig(componentToRemove, :))
+
+%%- EITHER THIS  Remove the whole component - run this to remove
 artifactSignal = mixingMatrix(:, componentToRemove) * icasig(componentToRemove, :);
 baselinedData = baselinedData - artifactSignal';
 
+%% - OR THIS - Removing specific parts of the component without subtracting all of it. - run this to remove just parts of the component not the whole component
+%% this works really well for sharp deflections
+
+% Make a copy of the original icasig before modifying it - don't run this
+% if you run this code again with different points - we need original casig
+% in order to remove the noise
+% ALWAYS RUN THIS BEFORE
+original_icasig = icasig;
+
+%% Handle peaks if you need to tame down some data that's deflected up - only run this if you have spikes on the peaks
+%% to bring those spikes lower to the rest of the data
+time_window_start = dsearchn(t_normalized', [5.51]');
+time_window_end = dsearchn(t_normalized', [5.7]');
+
+factor = 0.4;
+icasig(componentToRemove, time_window_start:time_window_end) = icasig(componentToRemove, time_window_start:time_window_end) * factor;
+
+%% Spline the data between two points of interest, this makes for smoother deflections
+artifact_start = dsearchn(t_normalized', 6.49');
+artifact_end = dsearchn(t_normalized', [6.70]');
+
+% Identify points just outside the artifact for interpolation
+x = [artifact_start-10:artifact_start-1, artifact_end+1:artifact_end+10];
+y = icasig(componentToRemove, x);
+
+% Generate more points for a smoother spline interpolation
+xi = (artifact_start:artifact_end);
+yi = spline(x, y, xi);
+
+% replace artifact in the component with interpolated values
+icasig(componentToRemove, xi) = yi;
+
+% plot again to compare
+figure(8), clf;
+plot(t_normalized, icasig(componentToRemove, :))
+
+% Recalculate the signal without the artifact
+reconstructed_signal = mixingMatrix(:, componentToRemove) * icasig(componentToRemove, :);
+
+% Construct the original artifact signal using the UNMODIFIED icasig
+original_artifact_signal = mixingMatrix(:, componentToRemove) * original_icasig(componentToRemove, :);
+
+% update baselinedData without the deflection
+baselinedData = baselinedData - original_artifact_signal' + reconstructed_signal';
+%% -- Finish of processing components
+
+%% Exporting
 exportfilename = [trial '/cleaned/' phase '_cleaned.csv'];
 
 % Export the data to a CSV file

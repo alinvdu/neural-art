@@ -11,7 +11,7 @@
 3. The data is pre-processed using Neural Signal Processing algorithms and then outputed in table format that the model can read, together with the ground truth.
     x. Cleaning the data:
         x.1. High pass filter.
-        x.2. Baseline normalization (with or without eyes open).
+        x.2. Baseline normalization (with or without eyes open) - should I take baseline before each visualization?
         x.3. ICA for cleaning data.
         x.4. Manual Inspect of Time-Frequency plot for all channels for individual removal of ICA components.
     a. ERPs.
