@@ -12,8 +12,8 @@
 
 % Define the file path (you should replace this with your actual file path)
 
-phase = 'phase_Stimuli_Abstract_Paint_Sea_recording_eyes_closed';
-trial = 'trial4/';
+phase = 'phase_Stimuli_Whispers_of_The_Void_recording';
+trial = 'trial7/';
 filename = [trial phase '.csv'];
 
 % Set import options for metadata
@@ -273,22 +273,21 @@ baselinedData = baselinedData - artifactSignal';
 %% this works really well for sharp deflections
 
 % plot component to remove for inspection not normalized
-figure(7), clf;
-plot(t_normalized, icasig(componentToRemove, :))
-
 % Make a copy of the original icasig before modifying it - don't run this
 % if you run this code again with different points - we need original casig
 % in order to remove the noise
 % ALWAYS RUN THIS BEFORE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+figure(7), clf;
+plot(t_normalized, icasig(componentToRemove, :))
 original_icasig = icasig;
 
 %% Handle peaks if you need to tame down some data that's deflected up - only run this if you have spikes on the peaks
 %% to bring those spikes lower to the rest of the data
-time_window_start = dsearchn(t_normalized', [4.48]');
-time_window_end = dsearchn(t_normalized', [4.80]');
+time_window_start = dsearchn(t_normalized', 7.08');
+time_window_end = dsearchn(t_normalized', [7.25]');
 
 % multiplying - move peaks and throughs together regardless of mean
-factor = 0.7;
+factor = 0.5;
 icasig(componentToRemove, time_window_start:time_window_end) = icasig(componentToRemove, time_window_start:time_window_end) * factor;
 
 % multiply with mean - higher will become higher, and lower even lower
@@ -297,7 +296,7 @@ segment = icasig(componentToRemove, time_window_start:time_window_end);
 icasig(componentToRemove, time_window_start:time_window_end) = (segment - mean(segment)) * factor + mean(segment);
 
 % translating - translate valleys and peaks that are odd
-translatingFactor = 0.33;
+translatingFactor = -1;
 icasig(componentToRemove, time_window_start:time_window_end) = icasig(componentToRemove, time_window_start:time_window_end) + translatingFactor;
 
 %% resample code to deal with high frequency noise
@@ -323,8 +322,8 @@ figure(8), clf;
 plot(t_normalized, icasig(componentToRemove, :))
 
 %% Spline the data between two points of interest, this makes for smoother deflections
-artifact_start = dsearchn(t_normalized', 4.90');
-artifact_end = dsearchn(t_normalized', [0.86]');
+artifact_start = dsearchn(t_normalized', 0.86');
+artifact_end = dsearchn(t_normalized', [0.89]');
 
 % Identify points just outside the artifact for interpolation
 x = [artifact_start-10:artifact_start-1, artifact_end+1:artifact_end+10];
@@ -338,12 +337,12 @@ yi = spline(x, y, xi);
 icasig(componentToRemove, xi) = yi;
 
 %% create frequencies between some low band noise
-time_window_start = dsearchn(t_normalized', [5.48]');
-time_window_end = dsearchn(t_normalized', [5.59]');
+time_window_start = dsearchn(t_normalized', [5.32]');
+time_window_end = dsearchn(t_normalized', [5.70]');
 time_vector = t_normalized(time_window_start:time_window_end);
 
 % Define the target frequency for the artificial oscillation
-target_frequency = 2; % for example, 30 Hz
+target_frequency = 12; % for example, 30 Hz
 oscillatory_signal = sin(2 * pi * target_frequency * (time_vector - time_vector(1)));
 amplitude_scaling_factor = 0.3; % adjust this based on your component's scale
 

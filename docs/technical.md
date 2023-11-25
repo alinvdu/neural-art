@@ -1,3 +1,7 @@
+## Supported EEG devices
+    Emotiv Epoch X 14 channels.
+    https://www.emotiv.com/epoc-x/
+
 ## Data Configuration
 1. What kind of stimuli are used in order to associate brain state with certain images?
     Categories of stimuli:
@@ -64,3 +68,28 @@
 ## Processing the EEG data
     # Stage 1: Processing the invervalMarker andd md.csv data in Python.
         Process these 2 csv files and output 1 csv files / each recording with the appropriate fields.
+
+## User Exposed Data Analysis of EEG
+    * ICA (Independent component analysis):
+        -> user is able to see ICA time plots and topologies and accept or reject components.
+    * Baseline normalization and high pass filtering:
+        -> the EEG data is baselined normalized with recorded baseline data.
+        -> high pass filter.
+    * Both of the above are available in the user interface for direct visualization of the EEG recording.
+
+## Training an AI algorithm to learn latent representation and reconstruct EEG signal
+    Description: This part of the project deals with learning latent representation and it's based on Dream Diffusion paper: https://github.com/bbaaii/DreamDiffusion
+    Approach:
+        1. Augmented data:
+            Time shifting of the EEG data at 800 ms (beginning and end) -> a total of 1600ms. Then statistical and interpolative padding is applied to the data with simulated pink noise. This is applied to every sample from the EEG image dataset.
+        2. Train neural architecture latent representation of EEG signal by masking the signal and making the model predict.
+            From scratch with varying parameters such as: masking, depth, weight decay, dropout.
+
+## Fine tuning Stable Diffusion model (MidJourney based)
+    Using OpenJourney model that's fine tuned on MidJourney generated images we are fine tuning and comparing two approaches:
+        1. Used author provided checkpoints and continue training.
+        2. Train from scratch.
+    Model is being fine-tuned on about 1k art images that subjects either imagined or viewed during EEG recording.
+    During this process we use above EEG latent representation specially fitted for the kind of EEG recordings supported:
+        - for now Emotiv Epoch X 14 channels.
+
