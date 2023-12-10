@@ -9,13 +9,13 @@ def find_csv_files(root_dir):
                 if file.endswith('.csv'):
                     yield os.path.join(subdir, file), 'augmented' if 'augmented' in subdir else 'cleaned'
 
-def convert_to_npy(csv_path, npy_dir, index, subdir_type):
+def convert_to_npy(csv_path, npy_dir, index):
     data = np.loadtxt(csv_path, delimiter=',', skiprows=1)
-    npy_path = os.path.join(npy_dir, f"{subdir_type}_{index}.npy")
+    npy_path = os.path.join(npy_dir, f"{index}.npy")
     np.save(npy_path, data.T)
     return npy_path
 
-def copy_and_rename_image(csv_path, img_dir, index, subdir_type):
+def copy_and_rename_image(csv_path, img_dir, index):
     parts = csv_path.split(os.sep)
     csv_base_name = parts[-1].replace('_cleaned.csv', '').replace('_eyes_closed', '').replace('_augmented.csv', '')
 
@@ -28,7 +28,7 @@ def copy_and_rename_image(csv_path, img_dir, index, subdir_type):
         new_size = tuple([int(dim * 0.66) for dim in img.size])
         resized_img = img.resize(new_size, Image.Resampling.LANCZOS)
         
-        new_image_path = os.path.join(img_dir, f"{subdir_type}_{index}.png")
+        new_image_path = os.path.join(img_dir, f"{index}.png")
         resized_img.save(new_image_path)
         
         return new_image_path
@@ -46,9 +46,9 @@ def main():
 
     index = 1
     for csv_file, subdir_type in find_csv_files(processed_dir):
-        npy_path = convert_to_npy(csv_file, npy_dir, index, subdir_type)
-        copy_and_rename_image(csv_file, img_dir, index, subdir_type)
-        print(f"Processed {csv_file} into {npy_path}")
+        npy_path = convert_to_npy(csv_file, npy_dir, index)
+        copy_and_rename_image(csv_file, img_dir, index)
+        #print(f"Processed {csv_file} into {npy_path}")
         index += 1
 
 if __name__ == '__main__':

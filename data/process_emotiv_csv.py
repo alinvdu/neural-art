@@ -3,13 +3,16 @@ import argparse
 import os
 import numpy as np
 
+is_test = True
+initial_directory = is_test and '../test_data/' or ''
+
 def process_data(experiment_name, trial):
     # Load the intervalMarker data
-    print(f'raw/{experiment_name}/{trial}/eegData.csv');
-    interval_data = pd.read_csv(f'raw/{experiment_name}/{trial}/eegMetadata.csv')
+    print(f'{initial_directory}raw/{experiment_name}/{trial}/eegData.csv');
+    interval_data = pd.read_csv(f'{initial_directory}raw/{experiment_name}/{trial}/eegMetadata.csv')
 
     # Load the neural data, skipping the first two metadata rows
-    neural_data = pd.read_csv(f'raw/{experiment_name}/{trial}/eegData.csv', skiprows=1)
+    neural_data = pd.read_csv(f'{initial_directory}raw/{experiment_name}/{trial}/eegData.csv', skiprows=1)
 
     # Extract timestamp and the values of interest
     print(neural_data.columns)
@@ -25,7 +28,7 @@ def process_data(experiment_name, trial):
     baseline_data = baseline_data.reset_index(drop=True)
 
     print(baseline_data.iterrows())
-    output_dir = f'processed/csv_raw/{experiment_name}/{trial}/'
+    output_dir = f'{initial_directory}processed/csv_raw/{experiment_name}/{trial}/'
     for index, row in baseline_data.iterrows():
         eyesclosed_csv = f"{output_dir}baseline_eyesclosed.csv"
         eyesopen_csv = f"{output_dir}baseline_eyesopen.csv"
@@ -66,7 +69,7 @@ def process_data(experiment_name, trial):
         header_df = ['Timestamp', 'EEG.AF3', 'EEG.F7', 'EEG.F3', 'EEG.FC5', 'EEG.T7', 'EEG.P7', 'EEG.O1', 'EEG.O2', 'EEG.P8', 'EEG.T8', 'EEG.FC6', 'EEG.F4', 'EEG.F8', 'EEG.AF4']
 
         # Create the CSV file
-        output_dir = f'processed/csv_raw/{experiment_name}/{trial}/'
+        output_dir = f'{initial_directory}processed/csv_raw/{experiment_name}/{trial}/'
 
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
