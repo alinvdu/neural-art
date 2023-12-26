@@ -1,0 +1,28 @@
+version: '3.8'
+services:
+  cortex-service:
+    build: ./cortex-service
+    volumes:
+      - ./cortex-service:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - "3000:3000"
+    command: npm run dev
+
+  generation-service:
+    build: ./generation-service
+    volumes:
+      - ./generation-service:/usr/src/app
+    ports:
+      - "5001:5001"
+    environment:
+      - FLASK_ENV=development
+      - FLASK_APP=app.py  # Replace with your Flask app entry point
+
+  ui:
+    build: ./ui
+    volumes:
+      - ./ui:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - "80:80"

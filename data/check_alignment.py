@@ -5,7 +5,7 @@ import random
 def check_alignment(csv_path, npy_path):
     # Load the CSV and NPY data
     csv_data = np.loadtxt(csv_path, delimiter=',', skiprows=1)
-    npy_data = np.load(npy_path)
+    npy_data = np.load(npy_path).transpose()
 
     # Check the shape
     if csv_data.shape != npy_data.shape:
