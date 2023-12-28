@@ -184,7 +184,10 @@ class Cortex {
 
           socket.on("message", (data) => {
             let parsedData = JSON.parse(data);
-            if (parsedData.id === CREATE_SESSION_ID) {
+
+            if (parsedData.error) {
+              reject(parsedData.error);
+            } else if (parsedData.id === CREATE_SESSION_ID) {
               sessionId = parsedData["result"]["id"];
               resolve(sessionId);
             }
@@ -349,16 +352,32 @@ class Cortex {
       },
       id: SUB_REQUEST_ID,
     };
-    console.log("sub eeg request: ", subRequest);
     socket.send(JSON.stringify(subRequest));
-    socket.on("message", (data) => {
-      try {
-        // if(JSON.parse(data)['id']==SUB_REQUEST_ID){
-        console.log("SUB REQUEST RESULT --------------------------------");
-        console.log(data.toString("utf8"));
-        console.log("\r\n");
-        // }
-      } catch (error) {}
+
+    return new Promise((resolve, reject) => {
+      const onSubRequestHandler = (data) => {
+        try {
+          // if(JSON.parse(data)['id']==SUB_REQUEST_ID){
+          const parsedData = JSON.parse(data.toString("utf8"));
+          if (parsedData.result && parsedData.result.failure) {
+            socket.off("message", onSubRequestHandler);
+            reject(
+              parsedData.result &&
+                parsedData.result.failure[0] && {
+                  message: parsedData.result.failure[0].message,
+                }
+            );
+          } else {
+            socket.off("message", onSubRequestHandler);
+            resolve(data.toString("utf8"));
+          }
+          // }
+        } catch (error) {
+          socket.off("message", onSubRequestHandler);
+          reject(error);
+        }
+      };
+      socket.on("message", onSubRequestHandler);
     });
   }
 
@@ -489,13 +508,21 @@ class Cortex {
    * - logout data stream to console or file
    */
   sub(streams) {
-    this.socket.on("open", async () => {
-      await this.checkGrantAccessAndQuerySessionInfo();
-      this.subRequest(streams, this.authToken, this.sessionId);
-      this.socket.on("message", (data) => {
-        // log stream data to file or console here
-        // console.log(data)
-      });
+    return new Promise(async (resolve, reject) => {
+      if (!this.sessionId || !this.authToken) {
+        await this.checkGrantAccessAndQuerySessionInfo();
+      }
+      this.subRequest(streams, this.authToken, this.sessionId)
+        .then((subData) => {
+          this.socket.on("message", (data) => {
+            // log stream data to file or console here
+            // console.log(data)
+          });
+          resolve(subData);
+        })
+        .catch((err) => {
+          reject(err);
+        });
     });
   }
 

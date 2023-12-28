@@ -127,6 +127,7 @@ class ClientConnection {
               .then((recordId) => {
                 console.log("record stopped");
                 this.ongoingRecords[recordId] = false;
+                cortex.unsub;
               })
               .catch(() => {
                 console.log("problem stopping record");

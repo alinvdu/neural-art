@@ -11,7 +11,10 @@ import {
   StyledLogoWrapper,
   StyledMessage,
   StyledTitle,
+  StyledVisualFeedback,
+  StyledVisualFeedbackWrapper,
 } from "./Styles";
+import visualFeedback from "./vis-feedback.gif";
 
 const NOT_STARTED = "not-started";
 const BASELINE_TESTING = "baseline-testing";
@@ -26,7 +29,7 @@ const isEmpty = (myEmptyObj) =>
   Object.keys(myEmptyObj).length === 0 && myEmptyObj.constructor === Object;
 
 function App() {
-  const [progress, setProgress] = useState(NOT_STARTED);
+  const [progress, setProgress] = useState(IMAGINE_STAGE);
   const [id, setId] = useState(null);
   const [ws, setWs] = useState(null);
   const [hasBaseline, setBaseline] = useState(null);
@@ -156,17 +159,6 @@ function App() {
                 );
               } else {
                 setProgress(IMAGINE_COUNTDOWN);
-                setTimeout(() => {
-                  if (!errorRef.current) {
-                    // stop recording
-                    ws.send(
-                      JSON.stringify({
-                        action: "STOP_RECORD",
-                      })
-                    );
-                    setProgress(PROCESSING_IMAGINATION);
-                  }
-                }, IMAGINE_TIME);
               }
             }}
           />
@@ -176,19 +168,36 @@ function App() {
           <CountdownTimer
             initialCount={5}
             onFinish={() => {
-              setProgress(IMAGINE_STAGE);
-              ws.send(
-                JSON.stringify({
-                  action: "MARK_IMAGINE_START",
-                  time: Date.now(),
-                })
-              );
+              if (!error) {
+                setProgress(IMAGINE_STAGE);
+                ws.send(
+                  JSON.stringify({
+                    action: "MARK_IMAGINE_START",
+                    time: Date.now(),
+                  })
+                );
+
+                setTimeout(() => {
+                  setProgress(PROCESSING_IMAGINATION);
+                  // stop recording
+                  ws.send(
+                    JSON.stringify({
+                      action: "STOP_RECORD",
+                    })
+                  );
+                }, IMAGINE_TIME);
+              }
             }}
           />
         );
       }
       case IMAGINE_STAGE:
-        return <div>Here goes some graphics</div>;
+        return (
+          <StyledVisualFeedbackWrapper>
+            <p>Recording...</p>
+            <StyledVisualFeedback src={visualFeedback} />
+          </StyledVisualFeedbackWrapper>
+        );
       case PROCESSING_IMAGINATION:
         return <div>Generating images</div>;
       case ERROR:
