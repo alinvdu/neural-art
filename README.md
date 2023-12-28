@@ -9,6 +9,9 @@ An interface for visualizing and interacting with neural data, coupled with AI-d
 
 ## AI Model Architecture
 ### Training EEG representation
+Image generation from EEG data is trained on amazingly curated art images experiments, pipeline for processing raw EEG data can be checked here: https://github.com/bobergsatoko/neural-art/blob/main/docs/technical.md#eeg-data
+<img src="https://github.com/bobergsatoko/neural-art/assets/16021447/52b0ebfa-7469-4f1d-adbe-06e2880e6aeb" width="968">
+
 ### Fine-Tunning Stable Diffusion with CLIP
 
 ## Credits
