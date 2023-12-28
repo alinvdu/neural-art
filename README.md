@@ -18,6 +18,9 @@ Image generation from EEG data is trained on amazingly curated art images experi
 
 <img src="https://github.com/bobergsatoko/neural-art/assets/16021447/52b0ebfa-7469-4f1d-adbe-06e2880e6aeb" width="968">
 
+### Preliminary Results
+<img src="https://github.com/bobergsatoko/neural-art/assets/16021447/5c87e06a-b398-453f-8912-688bf60eb621" width="968">
+
 ## Credits
 ### Art
 Credits for art pictures go to: https://github.com/sai-42
