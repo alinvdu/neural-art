@@ -507,7 +507,7 @@ class Cortex {
    * - subcribe for stream
    * - logout data stream to console or file
    */
-  sub(streams) {
+  sub(streams, onCortexMessageReceived) {
     return new Promise(async (resolve, reject) => {
       if (!this.sessionId || !this.authToken) {
         await this.checkGrantAccessAndQuerySessionInfo();
@@ -515,8 +515,7 @@ class Cortex {
       this.subRequest(streams, this.authToken, this.sessionId)
         .then((subData) => {
           this.socket.on("message", (data) => {
-            // log stream data to file or console here
-            // console.log(data)
+            onCortexMessageReceived(data);
           });
           resolve(subData);
         })
