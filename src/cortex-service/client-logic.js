@@ -97,7 +97,7 @@ const handleClientLogic = (
           clientConnection.ongoingRecords[recordId] = false;
           // send data to the generation service for further processing and image generation
           // mock it for now
-          eegData[recordId] = extractRandomEegFromHardcoded();
+          eegData[id] = extractRandomEegFromHardcoded();
 
           generationService.send(
             JSON.stringify({

@@ -18,7 +18,7 @@ async def connect_to_cortex_service():
 
                 # Receiving a response
                 response = await websocket.recv()
-                print(f"Received response: {response}", flush=True)
+                #print(f"Received response: {response}", flush=True)
                 break  # Exit loop on successful connection
 
         except Exception as e:  # Catching a broader range of exceptions

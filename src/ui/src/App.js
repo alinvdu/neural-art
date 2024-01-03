@@ -29,7 +29,7 @@ const isEmpty = (myEmptyObj) =>
   Object.keys(myEmptyObj).length === 0 && myEmptyObj.constructor === Object;
 
 function App() {
-  const [progress, setProgress] = useState(IMAGINE_STAGE);
+  const [progress, setProgress] = useState(NOT_STARTED);
   const [id, setId] = useState(null);
   const [ws, setWs] = useState(null);
   const [hasBaseline, setBaseline] = useState(null);
@@ -37,6 +37,11 @@ function App() {
   const errorRef = useRef(error);
   const progressRef = useRef(progress);
   const [isRecording, setIsRecording] = useState(false);
+  const idRef = useRef(id);
+
+  useEffect(() => {
+    idRef.current = id;
+  }, [id]);
 
   useEffect(() => {
     return () => {
@@ -44,6 +49,7 @@ function App() {
         ws.send(
           JSON.stringify({
             action: "STOP_RECORD",
+            id: idRef.current,
           })
         );
       }
@@ -114,6 +120,7 @@ function App() {
                     ws.send(
                       JSON.stringify({
                         action: "START_RECORD",
+                        id: idRef.current,
                       })
                     );
                   }
@@ -122,6 +129,7 @@ function App() {
                 ws.send(
                   JSON.stringify({
                     action: "START_RECORD",
+                    id: idRef.current,
                   })
                 );
               }
@@ -141,6 +149,7 @@ function App() {
                 JSON.stringify({
                   action: "MARK_BASELINE",
                   time: Date.now(),
+                  id: idRef.current,
                 })
               );
             }}
@@ -155,6 +164,7 @@ function App() {
                 ws.send(
                   JSON.stringify({
                     action: "START_RECORD",
+                    id: idRef.current,
                   })
                 );
               } else {
@@ -174,6 +184,7 @@ function App() {
                   JSON.stringify({
                     action: "MARK_IMAGINE_START",
                     time: Date.now(),
+                    id: idRef.current,
                   })
                 );
 
@@ -183,8 +194,10 @@ function App() {
                   ws.send(
                     JSON.stringify({
                       action: "STOP_RECORD",
+                      id: idRef.current,
                     })
                   );
+                  setIsRecording(false);
                 }, IMAGINE_TIME);
               }
             }}
