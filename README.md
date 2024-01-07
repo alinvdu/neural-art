@@ -3,7 +3,7 @@ An interface for generating art images from neural data compatible with Emotiv E
 
 <img src="https://github.com/bobergsatoko/neural-art/assets/16021447/e97b88ee-7f20-40e8-8155-579b7496bbb4" width="968">
 
-### Training EEG representation
+### Neural Art User Interface
 <img src="https://github.com/bobergsatoko/neural-art/assets/16021447/9fa3c6c4-937e-4101-8733-2dc90ff76b9a" width="968">
 
 ## Brain on Art
