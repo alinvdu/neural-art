@@ -1,5 +1,3 @@
-# Use the official lightweight Python image.
-# https://hub.docker.com/_/python
 FROM python:3.8-slim
 
 # Create and change to the app directory.
@@ -18,5 +16,4 @@ COPY . .
 EXPOSE 5001
 
 # Run the web service on container startup.
-CMD ["flask", "run", "--host=0.0.0.0", "--port=5001"]
-
+CMD ["python", "app.py"]

@@ -20,9 +20,15 @@ class ChangeHandler(FileSystemEventHandler):
     def on_any_event(self, event):
         if event.is_directory:
             return
-        if event.event_type in ('created', 'modified'):
+        if '__pycache__' in event.src_path:  # Ignore changes in __pycache__ directory
+            return
+        if self.is_relevant_file(event.src_path) and event.event_type in ('created', 'modified'):
             print(f"Restarting service due to changes in: {event.src_path}", flush=True)
             self.restart_service()
+            
+    def is_relevant_file(self, path):
+        # Check if the file is 'main.py' in the root or within the 'generative' directory
+        return os.path.basename(path) == 'app.py' or 'generative/' in path 
 
 if __name__ == "__main__":
     path = '.'  # path to watch for changes

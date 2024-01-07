@@ -26,18 +26,26 @@ class ClientConnection {
 
       this.ws.on("message", (message) => {
         const parsedMessage = JSON.parse(message);
+        console.log(parsedMessage);
         if (parsedMessage.client === "generation-service") {
           if (!this.generationService) {
             this.generationService = ws;
             console.log("Generation service connected");
           } else {
-            handleGenerationServiceLogic(this.ws, parsedMessage, this.clients);
+            console.log("received images");
+            const images = parsedMessage.images;
+            this.clients[parsedMessage.clientId].send(
+              JSON.stringify({
+                images,
+                action: "SEND_IMAGES",
+              })
+            );
           }
         } else {
           if (!this.clients[parsedMessage.id]) {
             const randomUuid = uuidv4();
             this.clients[randomUuid] = ws;
-            ws.send(JSON.stringify({ id: randomUuid }));
+            ws.send(JSON.stringify({ action: "SET_ID", id: randomUuid }));
             console.log("client connected", randomUuid);
           }
           handleClientLogic(

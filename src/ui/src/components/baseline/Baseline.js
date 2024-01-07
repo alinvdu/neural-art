@@ -16,7 +16,7 @@ const StyledIntroText = styled.p`
 const INTRO_DELAY = 2500;
 const BASELINE_TIME = 8000;
 
-const Baseline = ({ setProgress, markBaseline }) => {
+const Baseline = ({ setProgress, markBaseline, markEndBaseline }) => {
   const [phase, setPhase] = useState("INTRO");
 
   useEffect(() => {
@@ -45,6 +45,7 @@ const Baseline = ({ setProgress, markBaseline }) => {
               markBaseline();
               // transmit the beginning the marking of baseline start
               setTimeout(() => {
+                // markEndBaseline();
                 setProgress(IMAGINE_INTRO);
               }, BASELINE_TIME);
             }}

@@ -22,7 +22,6 @@ class Cortex {
         params: {},
       };
       const sendQueryRequest = () => {
-        console.log("queryHeadsetRequest");
         socket.send(JSON.stringify(queryHeadsetRequest));
       };
 
@@ -241,9 +240,9 @@ class Cortex {
     });
   }
 
-  injectMarkerRequest(authToken, sessionId, label, value, port, time) {
+  injectMarkerRequest(authToken, sessionId, label, value, time) {
     let socket = this.socket;
-    const INJECT_MARKER_REQUEST_ID = 13;
+    const INJECT_MARKER_REQUEST_ID = 998;
     let injectMarkerRequest = {
       jsonrpc: "2.0",
       id: INJECT_MARKER_REQUEST_ID,
@@ -253,7 +252,7 @@ class Cortex {
         session: sessionId,
         label: label,
         value: value,
-        port: port,
+        port: "999",
         time: time,
       },
     };
@@ -263,13 +262,49 @@ class Cortex {
       socket.on("message", (data) => {
         try {
           if (JSON.parse(data)["id"] == INJECT_MARKER_REQUEST_ID) {
+            const parsedData = JSON.parse(data);
             console.log(
               "INJECT MARKER RESULT --------------------------------"
             );
-            // console.log(data)
-            resolve(data);
+            console.log(parsedData);
+            resolve(parsedData.result.marker.uuid);
           }
-        } catch (error) {}
+        } catch (error) {
+          reject(error);
+        }
+      });
+    });
+  }
+
+  updateMarkerRequest(authToken, sessionId, markerId, time) {
+    let socket = this.socket;
+    const UPDATE_MARKER_REQUEST_ID = 25;
+    let injectMarkerRequest = {
+      jsonrpc: "2.0",
+      id: UPDATE_MARKER_REQUEST_ID,
+      method: "updateMarker",
+      params: {
+        cortexToken: authToken,
+        session: sessionId,
+        markerId,
+        time: time,
+      },
+    };
+
+    return new Promise(function (resolve, reject) {
+      socket.send(JSON.stringify(injectMarkerRequest));
+      socket.on("message", (data) => {
+        try {
+          if (JSON.parse(data)["id"] == UPDATE_MARKER_REQUEST_ID) {
+            const parsedData = JSON.parse(data);
+            console.log(
+              "UPDATE MARKER RESULT --------------------------------"
+            );
+            resolve(parsedData);
+          }
+        } catch (error) {
+          reject(error);
+        }
       });
     });
   }
@@ -293,6 +328,41 @@ class Cortex {
         try {
           if (JSON.parse(data)["id"] == STOP_RECORD_REQUEST_ID) {
             console.log("STOP RECORD RESULT --------------------------------");
+            // console.log(data)
+            resolve(JSON.parse(data));
+          }
+        } catch (error) {
+          reject(error);
+        }
+      });
+    });
+  }
+
+  exportRecord(authToken, sessionId, recordId) {
+    let socket = this.socket;
+    const EXPORT_REQUEST_ID = 15;
+    let exportRecordRequest = {
+      jsonrpc: "2.0",
+      method: "exportRecord",
+      params: {
+        cortexToken: authToken,
+        recordIds: [recordId],
+        format: "CSV",
+        streamTypes: ["EEG"],
+        folder: "/Users/alindumitru/Documents/recordings",
+        version: "V1",
+      },
+      id: EXPORT_REQUEST_ID,
+    };
+
+    return new Promise(function (resolve, reject) {
+      socket.send(JSON.stringify(exportRecordRequest));
+      socket.on("message", (data) => {
+        try {
+          if (JSON.parse(data)["id"] == EXPORT_REQUEST_ID) {
+            console.log(
+              "EXPORT RECORD RESULT --------------------------------"
+            );
             // console.log(data)
             resolve(JSON.parse(data));
           }

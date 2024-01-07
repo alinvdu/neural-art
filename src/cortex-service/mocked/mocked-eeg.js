@@ -42,39 +42,38 @@ async function processTrial(trialPath) {
   const metadata = await readCsv(metadataPath);
   const eegData = await readCsv(dataPath, (fromLine = 2));
 
+  return processEEGTrial(metadata, eegData, ",");
+}
+
+function processEEGTrial(metadata, eegData, delimiter = ",") {
   const result = {
     eegMetadata: [],
     eegData: [],
-    baselineData: [],
+    baseline: [],
   };
 
   metadata.forEach((entry) => {
-    const fields =
-      entry["latency;duration;type;marker_value;key;timestamp;marker_id"].split(
-        ";"
-      );
+    const type = entry["type"];
+    const markerTimestamp = parseFloat(entry["timestamp"]);
 
-    const type = fields[2];
-    const markerTimestamp = parseFloat(fields[5]);
-
-    const startIndex = eegData.findIndex(
-      (row) => parseFloat(row["Timestamp"]) === markerTimestamp
-    );
+    const startIndex = eegData.findIndex((row) => {
+      return parseFloat(row["Timestamp"]) === markerTimestamp;
+    });
     const endIndex = startIndex + 8 * sampleRate; // Adjust for 8 seconds
 
     if (startIndex !== -1) {
       result.eegMetadata.push({ type: type, timestamp: markerTimestamp });
 
       const eegSegment = eegData.slice(startIndex, endIndex).map((row) => {
-        let eegRow = { timestamp: parseFloat(row["Timestamp"]) };
+        let eegRow = [parseFloat(row["Timestamp"])];
         eegChannels.forEach((channel) => {
-          eegRow[channel] = parseFloat(row[channel]);
+          eegRow.push(parseFloat(row[channel]));
         });
         return eegRow;
       });
 
-      if (type.includes("eyesopen")) {
-        result.baselineData.push(...eegSegment);
+      if (type.includes("baseline")) {
+        result.baseline.push(...eegSegment);
       } else {
         result.eegData.push(...eegSegment);
       }
@@ -95,12 +94,12 @@ async function main() {
     const trialPath = path.join(recordingsPath, trial);
     const trialData = await processTrial(trialPath);
     EEG_IMAGINE_HARDCODED.push(trialData.eegData);
-    EEG_BASELINE_HARDCODED.push(trialData.baselineData);
+    EEG_BASELINE_HARDCODED.push(trialData.baseline);
     EEG_METADATA_HARDCODED.push(trialData.eegMetadata);
   }
 }
 
-main().catch(console.error);
+//main().catch(console.error);
 
 function getRandomArrayIndex(array) {
   return Math.floor(Math.random() * array.length);
@@ -115,4 +114,4 @@ const extractRandomEegFromHardcoded = () => {
   };
 };
 
-module.exports = extractRandomEegFromHardcoded;
+module.exports = { extractRandomEegFromHardcoded, processEEGTrial };

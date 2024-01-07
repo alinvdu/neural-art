@@ -9,9 +9,11 @@ export const StyledAppComponent = styled.div`
 
   background-image: url("${backgroundBlackPng}");
   background-size: cover;
+  background-attachment: fixed;
   width: 100%;
-  height: 100%;
   color: white;
+  position: relative;
+  min-height: 100%;
 `;
 
 export const StyledLogoWrapper = styled.div`
@@ -56,8 +58,8 @@ export const StyledVisualFeedbackWrapper = styled.div`
 `;
 
 export const StyledVisualFeedback = styled.img`
-  width: 420px;
-  height: 420px;
+  width: 350px;
+  height: 350px;
   border: 2px solid rgba(255, 255, 255, 1);
   border-radius: 50%;
 
@@ -72,4 +74,55 @@ export const StyledVisualFeedback = styled.img`
 
   animation: rotate 100s linear infinite;
   opacity: 1;
+`;
+
+export const StyledImage = styled.img`
+  box-shadow: #000 0px 0px 20px 3px;
+  border-radius: 2px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  margin: 8px;
+`;
+
+export const StyledImageWrapper = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-gap: 10px;
+  margin-bottom: 50px;
+`;
+
+export const StyledUploadEegDataWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+export const StyledFormTitle = styled.p``;
+
+export const StyledUploadForm = styled.input`
+  display: none;
+`;
+
+export const FileInputWrapper = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
+export const StyledFlexWrapper = styled.div`
+  display: flex;
+  margin-top: 200px;
+`;
+
+export const CustomButton = styled.div`
+  border: 1px solid white;
+  font-size: 18px;
+  padding: 5px 12px;
+  cursor: pointer;
+  &:hover {
+    background-color: white;
+    color: black;
+  }
+`;
+export const FileNameDisplay = styled.span`
+  margin-left: 10px;
+  font-size: 17px;
 `;

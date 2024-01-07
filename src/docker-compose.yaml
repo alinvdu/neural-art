@@ -12,16 +12,13 @@ services:
     env_file:
       - .env
 
-  generation-service:
-    build: ./generation-service
-    volumes:
-      - ./generation-service:/usr/src/app
-    ports:  
-      - "5001:5001"
-    command: python watcher.py
-    environment:
-      - FLASK_ENV=development
-      - FLASK_APP=app.py  # Replace with your Flask app entry point
+  # generation-service:
+  #   build: ./generation-service
+  #   volumes:
+  #     - ./generation-service:/usr/src/app
+  #   ports:  
+  #     - "5001:5001"
+  #   command: python -u watcher.py
 
   ui:
     build: ./ui

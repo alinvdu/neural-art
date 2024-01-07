@@ -5,12 +5,21 @@ import Baseline from "./components/baseline/Baseline";
 import logoPng from "./logo.png";
 import CountdownTimer from "./components/countdown-timer/CountdownTimer";
 import {
+  CustomButton,
+  FileInputWrapper,
+  FileNameDisplay,
   StyledAppComponent,
   StyledErrorWrapper,
+  StyledFlexWrapper,
+  StyledFormTitle,
+  StyledImage,
+  StyledImageWrapper,
   StyledLogo,
   StyledLogoWrapper,
   StyledMessage,
   StyledTitle,
+  StyledUploadEegDataWrapper,
+  StyledUploadForm,
   StyledVisualFeedback,
   StyledVisualFeedbackWrapper,
 } from "./Styles";
@@ -19,11 +28,13 @@ import visualFeedback from "./vis-feedback.gif";
 const NOT_STARTED = "not-started";
 const BASELINE_TESTING = "baseline-testing";
 export const IMAGINE_INTRO = "imagine-intro";
-const IMAGINE_TIME = 8000;
+const IMAGINE_TIME = 8400;
 const PROCESSING_IMAGINATION = "processing-imagination";
 const IMAGINE_STAGE = "imagine-stage";
 const IMAGINE_COUNTDOWN = "imagine-countdown";
 const ERROR = "error";
+const SHOW_IMAGES = "show-images";
+const UPLOAD_EEG_DATA = "upload-eeg-data";
 
 const isEmpty = (myEmptyObj) =>
   Object.keys(myEmptyObj).length === 0 && myEmptyObj.constructor === Object;
@@ -38,6 +49,13 @@ function App() {
   const progressRef = useRef(progress);
   const [isRecording, setIsRecording] = useState(false);
   const idRef = useRef(id);
+  const [images, setImages] = useState(null);
+  const eegDataInputRef = useRef(null);
+  const eegMetadataInputRef = useRef(null);
+  const [eegFilename, setEegFileName] = useState("");
+  const [metadataFileName, setMetadataFileName] = useState("");
+  // const [baselineMarkerId, setBaselineMarkerId] = useState(null);
+  // const [imagineMarkerId, setImagineMarkerId] = useState(null);
 
   useEffect(() => {
     idRef.current = id;
@@ -57,6 +75,53 @@ function App() {
   }, []);
 
   useEffect(() => {
+    if (progress === IMAGINE_STAGE) {
+      const time = Date.now();
+      console.log("sending time", time);
+      ws.send(
+        JSON.stringify({
+          action: "MARK_IMAGINE_START",
+          id: idRef.current,
+          time,
+        })
+      );
+
+      setTimeout(() => {
+        setProgress(UPLOAD_EEG_DATA);
+        // stop recording
+        ws.send(
+          JSON.stringify({
+            action: "STOP_RECORD",
+            id: idRef.current,
+            // markerId: imagineMarkerId,
+            // time: Date.now(),
+          })
+        );
+        setIsRecording(false);
+      }, IMAGINE_TIME);
+    }
+  }, [progress]);
+
+  const uploadFile = (file, isEEGData) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      let fileData = {
+        isEEGData,
+        content: Array.from(new Uint8Array(event.target.result)),
+      };
+      ws.send(
+        JSON.stringify({
+          action: "UPLOAD_FILE",
+          id: idRef.current,
+          fileData,
+        })
+      );
+    };
+
+    reader.readAsArrayBuffer(file);
+  };
+
+  useEffect(() => {
     errorRef.current = error;
   }, [error]);
 
@@ -67,9 +132,6 @@ function App() {
   const addEventListeners = (ws, setId) => {
     ws.addEventListener("message", (event) => {
       const data = JSON.parse(event.data);
-      if (data.id && !id) {
-        setId(data.id);
-      }
 
       switch (data.action) {
         case "RECORD_STARTED":
@@ -94,11 +156,31 @@ function App() {
               : data.err
           );
           break;
-        // ws.send(
-        //   JSON.stringify({
-        //     action: "STOP_RECORD",
-        //   })
-        // );
+        case "SEND_IMAGES":
+          setProgress(SHOW_IMAGES);
+          setImages(data.images);
+          break;
+        // case "SET_BASELINE_MARKER":
+        //   setBaselineMarkerId(data.markerId);
+        //   break;
+        // case "SET_IMAGINE_MARKER_ID":
+        //   setImagineMarkerId(data.markerId);
+        //   break;
+        case "FILE_UPLOADED":
+          setProgress(PROCESSING_IMAGINATION);
+          break;
+        case "SET_ID":
+          setId(data.id);
+          if (!errorRef.current) {
+            console.log("sending start record 1");
+            ws.send(
+              JSON.stringify({
+                action: "START_RECORD",
+                id: data.id,
+              })
+            );
+          }
+          break;
       }
     });
   };
@@ -116,16 +198,14 @@ function App() {
                 addEventListeners(ws, setId);
                 ws.addEventListener("open", (open) => {
                   setWs(ws);
-                  if (!errorRef.current) {
-                    ws.send(
-                      JSON.stringify({
-                        action: "START_RECORD",
-                        id: idRef.current,
-                      })
-                    );
-                  }
+                  ws.send(
+                    JSON.stringify({
+                      action: "INITIATE",
+                    })
+                  );
                 });
               } else {
+                console.log("sending start record 2");
                 ws.send(
                   JSON.stringify({
                     action: "START_RECORD",
@@ -153,6 +233,14 @@ function App() {
                 })
               );
             }}
+            // markEndBaseline={() => {
+            //   ws.send(
+            //     JSON.stringify({
+            //       action: "SET_MARKER_END",
+            //       markerId: baselineMarkerId,
+            //     })
+            //   );
+            // }}
           />
         );
       case IMAGINE_INTRO:
@@ -180,25 +268,6 @@ function App() {
             onFinish={() => {
               if (!error) {
                 setProgress(IMAGINE_STAGE);
-                ws.send(
-                  JSON.stringify({
-                    action: "MARK_IMAGINE_START",
-                    time: Date.now(),
-                    id: idRef.current,
-                  })
-                );
-
-                setTimeout(() => {
-                  setProgress(PROCESSING_IMAGINATION);
-                  // stop recording
-                  ws.send(
-                    JSON.stringify({
-                      action: "STOP_RECORD",
-                      id: idRef.current,
-                    })
-                  );
-                  setIsRecording(false);
-                }, IMAGINE_TIME);
               }
             }}
           />
@@ -225,6 +294,75 @@ function App() {
               }}
             />
           </StyledErrorWrapper>
+        );
+      case SHOW_IMAGES:
+        return (
+          <StyledFlexWrapper>
+            <StyledImageWrapper>
+              {images.map((base64Img, index) => (
+                <StyledImage
+                  key={index}
+                  src={`data:image/png;base64,${base64Img}`}
+                  alt={`Generated Image ${index + 1}`}
+                />
+              ))}
+            </StyledImageWrapper>
+          </StyledFlexWrapper>
+        );
+      case UPLOAD_EEG_DATA:
+        const handleEEGDataButtonClick = () => {
+          eegDataInputRef.current.click();
+        };
+        const handleMetadataInputRef = () => {
+          eegMetadataInputRef.current.click();
+        };
+        return (
+          <StyledUploadEegDataWrapper>
+            <StyledFormTitle>
+              Locate the last record in Emotiv PRO software and export the CSV
+              manually
+            </StyledFormTitle>
+            <StyledFormTitle>Upload Recorded EEG Data</StyledFormTitle>
+            <FileInputWrapper>
+              <StyledUploadForm
+                type="file"
+                ref={eegDataInputRef}
+                accept=".csv"
+                onChange={(event) => {
+                  const input = event.target.files[0];
+                  setEegFileName(input ? input.name : "");
+                  if (input) {
+                    uploadFile(input, true);
+                  }
+                }}
+              />
+              <CustomButton onClick={handleEEGDataButtonClick}>
+                Browse...
+              </CustomButton>
+              {eegFilename && <FileNameDisplay>{eegFilename}</FileNameDisplay>}
+            </FileInputWrapper>
+            <StyledFormTitle>Upload Recorded EEG MetaData</StyledFormTitle>
+            <FileInputWrapper>
+              <StyledUploadForm
+                type="file"
+                ref={eegMetadataInputRef}
+                accept=".csv"
+                onChange={(event) => {
+                  const input = event.target.files[0];
+                  setMetadataFileName(input ? input.name : "");
+                  if (input) {
+                    uploadFile(input, false);
+                  }
+                }}
+              />
+              <CustomButton onClick={handleMetadataInputRef}>
+                Browse...
+              </CustomButton>
+              {metadataFileName && (
+                <FileNameDisplay>{metadataFileName}</FileNameDisplay>
+              )}
+            </FileInputWrapper>
+          </StyledUploadEegDataWrapper>
         );
     }
   };
