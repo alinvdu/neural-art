@@ -3,8 +3,8 @@ An interface for generating art images from neural data compatible with Emotiv E
 
 <img src="https://github.com/bobergsatoko/neural-art/assets/16021447/e97b88ee-7f20-40e8-8155-579b7496bbb4" width="968">
 
-### Neural Art User Interface
-<img src="https://github.com/bobergsatoko/neural-art/assets/16021447/9fa3c6c4-937e-4101-8733-2dc90ff76b9a" width="968">
+### Neural Art User Interface - from baseline to generation
+<img src="https://github.com/bobergsatoko/neural-art/assets/16021447/49e01c47-055b-4dec-ab2d-74fe7b8fbdae" width="968">
 
 ## Brain on Art
 
@@ -32,6 +32,10 @@ Image generation from EEG data is trained on amazingly curated art images experi
 ### Compatible Headsets
 Emotiv Epoch X (14 channels).
 <img src="https://github.com/bobergsatoko/neural-art/assets/16021447/7519b70a-10fc-43e4-a655-84ea7af2d9f6" width="968">
+
+### No headset?
+You can use Emotiv Simualted Device to generate fake signal. But, you might still have to pay license to export.
+<img src="https://github.com/bobergsatoko/neural-art/assets/16021447/b6deb979-dad7-48be-b762-49a4b6b08a64" width="968">
 
 ### Demo
 Soon..
