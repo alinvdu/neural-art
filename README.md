@@ -2,7 +2,7 @@
 An interface for generating art images from neural data compatible with Emotiv Epoch X 14 channels headset.
 <img src="https://github.com/bobergsatoko/neural-art/assets/16021447/e97b88ee-7f20-40e8-8155-579b7496bbb4" width="968">
 
-### Neural Art User Interface - from baseline to generation
+### Generate Art From Brain Data
 <img src="https://github.com/bobergsatoko/neural-art/assets/16021447/2d7fb38b-8733-4abb-b4a3-9b1fcb35f82d" width="968">
 
 ## Brain on Art
