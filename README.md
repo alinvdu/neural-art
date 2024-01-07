@@ -30,10 +30,12 @@ Image generation from EEG data is trained on amazingly curated art images experi
 
 ### Compatible Headsets
 Emotiv Epoch X (14 channels).
+
 <img src="https://github.com/bobergsatoko/neural-art/assets/16021447/7519b70a-10fc-43e4-a655-84ea7af2d9f6" width="468">
 
 ### No headset?
 You can use Emotiv Simualted Device to generate fake signal. But, you might still have to pay license to export.
+
 <img src="https://github.com/bobergsatoko/neural-art/assets/16021447/b6deb979-dad7-48be-b762-49a4b6b08a64" width="268">
 
 ### Demo
