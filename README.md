@@ -4,7 +4,7 @@ An interface for generating art images from neural data compatible with Emotiv E
 <img src="https://github.com/bobergsatoko/neural-art/assets/16021447/e97b88ee-7f20-40e8-8155-579b7496bbb4" width="968">
 
 ### Generate Art From Brain Data
-<img src="https://github.com/bobergsatoko/neural-art/assets/16021447/2d7fb38b-8733-4abb-b4a3-9b1fcb35f82d" width="968">
+<img src="https://github.com/bobergsatoko/neural-art/assets/16021447/2d7fb38b-8733-4abb-b4a3-9b1fcb35f82d" width="1068">
 
 ## Brain on Art
 <img src="https://github.com/bobergsatoko/neural-art/assets/16021447/4b72c8c6-db18-4ba0-8a94-9c5585f7db30" width="968">
