@@ -41,6 +41,9 @@ You can use Emotiv Simualted Device to generate fake signal. But, you might stil
 ### Demo
 Soon..
 
+### Checkpoints
+Checkpoint for the fine-tuned model can be found [here](https://drive.google.com/file/d/1pLTbZ2oUC_LGhd3AljhhZLnEXSIK9SIW/view?usp=drive_link)
+
 ## Credits
 ### Art
 Credits for art pictures go to: https://github.com/sai-42
