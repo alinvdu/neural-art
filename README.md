@@ -9,6 +9,9 @@ An interface for generating art images from neural data compatible with Emotiv E
 ## Brain on Art
 <img src="https://github.com/bobergsatoko/neural-art/assets/16021447/4b72c8c6-db18-4ba0-8a94-9c5585f7db30" width="968">
 
+### Demo
+[![EEG Art Demo](https://github.com/bobergsatoko/neural-art/assets/16021447/1904fac6-8150-45c4-b1ec-bcfdbf5af304)](https://www.youtube.com/watch?v=8v_EB73m6cQ "Generating Art Images From Neural Data Recording")
+
 ## AI Model Architecture
 
 ### Training EEG representation
@@ -37,10 +40,6 @@ Emotiv Epoch X (14 channels).
 You can use Emotiv Simualted Device to generate fake signal. But, you might still have to pay license to export.
 
 <img src="https://github.com/bobergsatoko/neural-art/assets/16021447/b6deb979-dad7-48be-b762-49a4b6b08a64" width="268">
-
-### Demo
-[![EEG Art Demo](https://github.com/bobergsatoko/neural-art/assets/16021447/1904fac6-8150-45c4-b1ec-bcfdbf5af304)](https://www.youtube.com/watch?v=8v_EB73m6cQ "Generating Art Images From Neural Data Recording")
-
 
 ### Checkpoints
 Checkpoint for the fine-tuned model can be found [here](https://drive.google.com/file/d/1pLTbZ2oUC_LGhd3AljhhZLnEXSIK9SIW/view?usp=drive_link)
