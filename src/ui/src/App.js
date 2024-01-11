@@ -107,7 +107,7 @@ function App() {
     reader.onload = (event) => {
       let fileData = {
         isEEGData,
-        content: Array.from(new Uint8Array(event.target.result)),
+        content: event.target.result, // file content as a text string
       };
       ws.send(
         JSON.stringify({
@@ -118,7 +118,8 @@ function App() {
       );
     };
 
-    reader.readAsArrayBuffer(file);
+    // Read the file as text
+    reader.readAsText(file);
   };
 
   useEffect(() => {

@@ -211,6 +211,7 @@ class eLDM:
 
         with model.ema_scope():
             model.eval()
+            print(f'generating for: {fmri_embedding}', flush=True)
             latent = fmri_embedding
             # assert latent.shape[-1] == self.fmri_latent_dim, 'dim error'
 
