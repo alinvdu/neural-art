@@ -39,7 +39,8 @@ You can use Emotiv Simualted Device to generate fake signal. But, you might stil
 <img src="https://github.com/bobergsatoko/neural-art/assets/16021447/b6deb979-dad7-48be-b762-49a4b6b08a64" width="268">
 
 ### Demo
-Soon..
+[![EEG Art Demo](https://github.com/bobergsatoko/neural-art/assets/16021447/1904fac6-8150-45c4-b1ec-bcfdbf5af304)](https://www.youtube.com/watch?v=8v_EB73m6cQ "Generating Art Images From Neural Data Recording")
+
 
 ### Checkpoints
 Checkpoint for the fine-tuned model can be found [here](https://drive.google.com/file/d/1pLTbZ2oUC_LGhd3AljhhZLnEXSIK9SIW/view?usp=drive_link)
