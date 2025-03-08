@@ -1,5 +1,5 @@
 # Welcome to Neural Art
-An interface for generating art images from neural data compatible with Emotiv Epoch X 14 channels headset.
+Generate neural art images similar to MidJourney directly from your brain data. Compatible with Emotiv Epoch X (14 channels). Open sourced fine-tuned diffusion model and EEG encoder-decoder.
 
 <img src="https://github.com/bobergsatoko/neural-art/assets/16021447/e97b88ee-7f20-40e8-8155-579b7496bbb4" width="968">
 
